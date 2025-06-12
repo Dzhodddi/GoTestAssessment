@@ -1,0 +1,217 @@
+basePath: /v1
+definitions:
+  main.CreateCatPayload:
+    properties:
+      breed:
+        maxLength: 200
+        type: string
+      name:
+        maxLength: 200
+        type: string
+      salary:
+        minimum: 0
+        type: integer
+      year_of_experience:
+        minimum: 1
+        type: integer
+    required:
+    - breed
+    - name
+    - salary
+    - year_of_experience
+    type: object
+  main.UpdateCatInfoPayload:
+    properties:
+      salary:
+        minimum: 0
+        type: integer
+    required:
+    - salary
+    type: object
+  store.Cat:
+    properties:
+      breed:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      salary:
+        type: integer
+      year_of_experience:
+        type: integer
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Golang engineer test assessment - the Spy Cat Agency
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Golang engineer test assessment - the Spy Cat Agency
+paths:
+  /health:
+    get:
+      description: Health check
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Health check
+      tags:
+      - health
+  /spycat:
+    get:
+      consumes:
+      - application/json
+      description: Fetches spy cat list
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.Cat'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Fetches spy cat list
+      tags:
+      - spycat
+    post:
+      consumes:
+      - application/json
+      description: Create new spy cat
+      parameters:
+      - description: SpyCat payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreateCatPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/store.Cat'
+        "400":
+          description: Bad Request
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create spy cat
+      tags:
+      - spycat
+  /spycat/{id}:
+    delete:
+      description: Delete spy cat by ID
+      parameters:
+      - description: Cat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Delete spy cat
+      tags:
+      - spycat
+    get:
+      description: Get cat info by ID
+      parameters:
+      - description: Cat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.Cat'
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get cat info
+      tags:
+      - spycat
+    patch:
+      description: Update cat salary by ID
+      parameters:
+      - description: Cat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update SpyCat payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/main.UpdateCatInfoPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.Cat'
+        "400":
+          description: Bad Request
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update cat salary
+      tags:
+      - spycat
+swagger: "2.0"
