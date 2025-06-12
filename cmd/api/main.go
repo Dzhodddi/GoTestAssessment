@@ -34,7 +34,7 @@ func main() {
 			addr:               env.GetString("DB_ADDR", "postgresql://postgres:adminadmin@localhost:5432/testGo?sslmode=disable"),
 			maxOpenConnections: 10,
 			maxIdleConnections: 10,
-			maxIdleTime:        "15m",
+			maxIdleTime:        env.GetString("maxIdleTime", "15m"),
 		},
 	}
 

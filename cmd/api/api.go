@@ -2,7 +2,9 @@ package main
 
 import (
 	"FIDOtestBackendApp/docs"
+	"FIDOtestBackendApp/internal/env"
 	"FIDOtestBackendApp/internal/store"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -32,7 +34,7 @@ type config struct {
 
 func (app *application) run(mux http.Handler) error {
 	docs.SwaggerInfo.Version = version
-	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Host = fmt.Sprintf(env.GetString("apiURL", "localhost"), env.GetString("ADDR", ":8080"))
 	docs.SwaggerInfo.BasePath = "/v1"
 	srv := echo.New()
 	srv.Any("/*", echo.WrapHandler(mux))
