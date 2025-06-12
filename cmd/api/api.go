@@ -68,7 +68,7 @@ func (app *application) mount() http.Handler {
 	v1 := e.Group("/v1")
 	v1.GET("/health", app.healthCheckHandler)
 	v1.GET("/swagger/*", echoSwagger.WrapHandler)
-	
+
 	cats := v1.Group("/spycat")
 	app.registerCatGroup(cats)
 
@@ -89,4 +89,9 @@ func (app *application) registerMissionGroup(g *echo.Group) {
 	g.POST("", app.createMissionHandler)
 	g.DELETE("/:id", app.deleteMissionHandler)
 	g.PATCH("/:id", app.updateMissionStatus)
+	g.PATCH("/:mission_id/target/:target_id", app.updateTargetNote)
+	g.PATCH("/:mission_id/target_status/:target_id", app.updateTargetStatus)
+	g.DELETE("/:mission_id/target/:target_id", app.deleteTarget)
+	g.POST("/:mission_id/target", app.addTarget)
+
 }
