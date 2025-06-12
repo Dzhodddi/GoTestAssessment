@@ -1,6 +1,7 @@
 package db
 
 import (
+	"FIDOtestBackendApp/internal/store"
 	"context"
 	"database/sql"
 	"time"
@@ -18,7 +19,7 @@ func New(addr string, maxOpenConnections, maxIdleConnections int, maxIdleTime st
 		return nil, err
 	}
 	db.SetConnMaxLifetime(duration)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), store.QueryTimeOut)
 	defer cancel()
 	err = db.PingContext(ctx)
 	if err != nil {

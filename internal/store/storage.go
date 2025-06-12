@@ -11,6 +11,8 @@ var (
 	QueryTimeOut      = 5 * time.Second
 	ErrNotFound       = errors.New("record not found")
 	MissionedAssigned = errors.New("mission assigned")
+	TargetAmountError = errors.New("target amount error")
+	ViolatePK         = errors.New("violate pk error")
 )
 
 type Storage struct {
@@ -27,6 +29,10 @@ type Storage struct {
 		UpdateMissionStatus(ctx context.Context, mission *UpdatedMission) error
 	}
 	Target interface {
+		UpdateTargetNote(ctx context.Context, updateNote *UpdateTargetNote) error
+		UpdateTargetStatus(ctx context.Context, updateTargetStatus *UpdateTargetStatus) error
+		DeleteTarget(ctx context.Context, missionID, targetID int64) error
+		AddTarget(ctx context.Context, target *Target) error
 	}
 }
 
