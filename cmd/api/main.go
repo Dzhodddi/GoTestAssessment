@@ -4,12 +4,17 @@ import (
 	"FIDOtestBackendApp/internal/db"
 	"FIDOtestBackendApp/internal/env"
 	"FIDOtestBackendApp/internal/store"
+	"errors"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 	"log"
 )
 
 const version = "0.0.1"
+
+var (
+	ConflictError = errors.New("conflict")
+)
 
 //	@title			Golang engineer test assessment - the Spy Cat Agency
 //	@description	API for Golang engineer test assessment - the Spy Cat Agency

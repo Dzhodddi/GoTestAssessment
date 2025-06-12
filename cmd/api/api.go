@@ -34,7 +34,7 @@ type config struct {
 
 func (app *application) run(mux http.Handler) error {
 	docs.SwaggerInfo.Version = version
-	docs.SwaggerInfo.Host = fmt.Sprintf(env.GetString("apiURL", "localhost"), env.GetString("ADDR", ":8080"))
+	docs.SwaggerInfo.Host = fmt.Sprint(env.GetString("apiURL", "localhost"), env.GetString("ADDR", ":8080"))
 	docs.SwaggerInfo.BasePath = "/v1"
 	srv := echo.New()
 	srv.Any("/*", echo.WrapHandler(mux))
@@ -68,11 +68,25 @@ func (app *application) mount() http.Handler {
 	v1 := e.Group("/v1")
 	v1.GET("/health", app.healthCheckHandler)
 	v1.GET("/swagger/*", echoSwagger.WrapHandler)
+	
 	cats := v1.Group("/spycat")
-	cats.POST("", app.createCatHandler)
-	cats.DELETE("/:id", app.deleteCatHandler)
-	cats.GET("/:id", app.getCatByIDHandler)
-	cats.PATCH("/:id", app.updateCatHandler)
-	cats.GET("", app.getPaginatedCatListHandler)
+	app.registerCatGroup(cats)
+
+	mission := v1.Group("/mission")
+	app.registerMissionGroup(mission)
 	return e
+}
+
+func (app *application) registerCatGroup(g *echo.Group) {
+	g.POST("", app.createCatHandler)
+	g.DELETE("/:id", app.deleteCatHandler)
+	g.GET("/:id", app.getCatByIDHandler)
+	g.PATCH("/:id", app.updateCatHandler)
+	g.GET("", app.getPaginatedCatListHandler)
+}
+
+func (app *application) registerMissionGroup(g *echo.Group) {
+	g.POST("", app.createMissionHandler)
+	g.DELETE("/:id", app.deleteMissionHandler)
+	g.PATCH("/:id", app.updateMissionStatus)
 }
