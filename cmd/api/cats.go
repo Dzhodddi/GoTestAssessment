@@ -16,7 +16,7 @@ type CreateCatPayload struct {
 	Name       string `json:"name" validate:"required,max=200"`
 	Experience int    `json:"year_of_experience" validate:"required,gte=1"`
 	Breed      string `json:"breed" validate:"required,max=200"`
-	Salary     int    `json:"salary" validate:"required,gte=0"`
+	Salary     int    `json:"salary" validate:"required,gte=1"`
 }
 
 type UpdateCatInfoPayload struct {
