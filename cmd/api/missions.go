@@ -11,7 +11,7 @@ import (
 
 type MissionPayload struct {
 	Complete bool     `json:"complete" validate:"required"`
-	Targets  []Target `json:"targets" validate:"required,dive"`
+	Targets  []Target `json:"targets" validate:"required,min=1,max=3,dive"`
 }
 
 // Create Mission
@@ -64,9 +64,14 @@ func (app *application) createMissionHandler(c echo.Context) error {
 
 	err := app.store.Mission.CreateMission(c.Request().Context(), mission)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		switch err {
+		case store.ViolatePK:
+			return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		default:
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
 	}
-	return nil
+	return c.NoContent(http.StatusCreated)
 }
 
 // Delete mission

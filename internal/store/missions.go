@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
-	"time"
+	"github.com/lib/pq"
 )
 
 type Mission struct {
@@ -30,7 +30,7 @@ func (s *MissionStore) CreateMission(ctx context.Context, mission *MissionWithTa
 	const queryAddMission = `INSERT INTO missions (cat_id, completed) VALUES ($1, $2) RETURNING id`
 	const queryAddTargets = `INSERT INTO targets (mission_id, name, country, notes, completed) VALUES ($1, $2, $3, $4, $5) RETURNING id`
 
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOut)
 	defer cancel()
 
 	tx, _ := s.db.BeginTx(ctx, nil)
@@ -47,6 +47,11 @@ func (s *MissionStore) CreateMission(ctx context.Context, mission *MissionWithTa
 		target.MissionID = missionID
 		err = tx.QueryRowContext(ctx, queryAddTargets, missionID, target.Name, target.Country, target.Notes, target.Completed).Scan(&target.ID)
 		if err != nil {
+			if pgErr, ok := err.(*pq.Error); ok {
+				if pgErr.Code == "23505" {
+					return ViolatePK
+				}
+			}
 			_ = tx.Rollback()
 			return err
 		}
@@ -60,7 +65,7 @@ func (s *MissionStore) CreateMission(ctx context.Context, mission *MissionWithTa
 func (s *MissionStore) DeleteMission(ctx context.Context, id int64) error {
 	checkIdQuery := `SELECT cat_id FROM missions WHERE id = $1`
 
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOut)
 	defer cancel()
 
 	var catID *int64
@@ -95,7 +100,7 @@ func (s *MissionStore) DeleteMission(ctx context.Context, id int64) error {
 func (s *MissionStore) UpdateMissionStatus(ctx context.Context, missionState *UpdatedMission) error {
 	query := `UPDATE missions SET completed = $1 WHERE id = $2`
 
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOut)
 	defer cancel()
 
 	res, err := s.db.ExecContext(ctx, query, missionState.Status, missionState.ID)
