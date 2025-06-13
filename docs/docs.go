@@ -48,6 +48,435 @@ const docTemplate = `{
                 }
             }
         },
+        "/mission": {
+            "post": {
+                "description": "Create new Mission",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mission"
+                ],
+                "summary": "Create Mission",
+                "parameters": [
+                    {
+                        "description": "Mission payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.MissionPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/store.MissionWithTargets"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/mission/mission_list": {
+            "get": {
+                "description": "List of missions",
+                "tags": [
+                    "mission"
+                ],
+                "summary": "List of missions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store.MissionWithMetadata"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/mission/{id}": {
+            "get": {
+                "description": "Get one of mission by ID",
+                "tags": [
+                    "mission"
+                ],
+                "summary": "Get one of mission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete mission by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mission"
+                ],
+                "summary": "Delete mission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "mission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update mission by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mission"
+                ],
+                "summary": "Update mission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/store.UpdatedMission"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/mission/{id}/cat/{cat_id}": {
+            "patch": {
+                "description": "Add Spy Cat to Mission",
+                "tags": [
+                    "mission"
+                ],
+                "summary": "Add Spy Cat to Mission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Cat ID",
+                        "name": "cat_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/mission/{mission_id}/target": {
+            "post": {
+                "description": "Add target to mission by mission_id and target_id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "Add target to mission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "mission_id's ID",
+                        "name": "mission_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Target payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.Target"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/mission/{mission_id}/target/{target_id}": {
+            "delete": {
+                "description": "Delete target by mission id and target id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "Delete target",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "mission_id's ID",
+                        "name": "mission_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "target_id's ID",
+                        "name": "target_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update target's note  by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "Update target's note",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "mission_id's ID",
+                        "name": "mission_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "target_id's ID",
+                        "name": "target_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Target note",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.UpdateNotesPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/store.UpdateTargetNote"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/mission/{mission_id}/target_status/{target_id}": {
+            "patch": {
+                "description": "Update target's status  by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "Update target's status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "mission_id's ID",
+                        "name": "mission_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "target_id's ID",
+                        "name": "target_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/store.UpdateTargetStatus"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/spycat": {
             "get": {
                 "description": "Fetches spy cat list",
@@ -282,11 +711,59 @@ const docTemplate = `{
                 },
                 "salary": {
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 1
                 },
                 "year_of_experience": {
                     "type": "integer",
                     "minimum": 1
+                }
+            }
+        },
+        "main.MissionPayload": {
+            "type": "object",
+            "required": [
+                "complete",
+                "targets"
+            ],
+            "properties": {
+                "complete": {
+                    "type": "boolean"
+                },
+                "targets": {
+                    "type": "array",
+                    "maxItems": 3,
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/main.Target"
+                    }
+                }
+            }
+        },
+        "main.Target": {
+            "type": "object",
+            "required": [
+                "country",
+                "name",
+                "notes"
+            ],
+            "properties": {
+                "complete": {
+                    "type": "boolean"
+                },
+                "country": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
+                "notes": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
                 }
             }
         },
@@ -299,6 +776,19 @@ const docTemplate = `{
                 "salary": {
                     "type": "integer",
                     "minimum": 0
+                }
+            }
+        },
+        "main.UpdateNotesPayload": {
+            "type": "object",
+            "required": [
+                "notes"
+            ],
+            "properties": {
+                "notes": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
                 }
             }
         },
@@ -319,6 +809,107 @@ const docTemplate = `{
                 },
                 "year_of_experience": {
                     "type": "integer"
+                }
+            }
+        },
+        "store.Mission": {
+            "type": "object",
+            "properties": {
+                "cat_id": {
+                    "type": "integer"
+                },
+                "completed": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "store.MissionWithMetadata": {
+            "type": "object",
+            "properties": {
+                "cat": {
+                    "$ref": "#/definitions/store.Cat"
+                },
+                "mission": {
+                    "$ref": "#/definitions/store.Mission"
+                }
+            }
+        },
+        "store.MissionWithTargets": {
+            "type": "object",
+            "properties": {
+                "mission": {
+                    "$ref": "#/definitions/store.Mission"
+                },
+                "targets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/store.Target"
+                    }
+                }
+            }
+        },
+        "store.Target": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "boolean"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mission_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                }
+            }
+        },
+        "store.UpdateTargetNote": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "mission_id": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                }
+            }
+        },
+        "store.UpdateTargetStatus": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "mission_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "store.UpdatedMission": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
                 }
             }
         }
