@@ -4,7 +4,9 @@ import (
 	"FIDOtestBackendApp/docs"
 	"FIDOtestBackendApp/internal/env"
 	"FIDOtestBackendApp/internal/store"
+	"FIDOtestBackendApp/internal/store/cache"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -14,9 +16,10 @@ import (
 )
 
 type application struct {
-	config config
-	logger *zap.SugaredLogger
-	store  store.Storage
+	config       config
+	logger       *zap.SugaredLogger
+	store        store.Storage
+	cacheStorage cache.Storage
 }
 
 type dbConfig struct {
@@ -25,11 +28,25 @@ type dbConfig struct {
 	maxIdleConnections int
 	maxIdleTime        string
 }
-
+type redisConfig struct {
+	addr     string
+	password string
+	db       int
+	enabled  bool
+}
 type config struct {
-	addr string
-	db   dbConfig
-	env  string
+	addr        string
+	db          dbConfig
+	env         string
+	redisConfig redisConfig
+}
+
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
 }
 
 func (app *application) run(mux http.Handler) error {
@@ -47,6 +64,7 @@ func (app *application) run(mux http.Handler) error {
 
 func (app *application) mount() http.Handler {
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: Validate}
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -64,8 +82,21 @@ func (app *application) mount() http.Handler {
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		Timeout: 60 * time.Second,
 	}))
-
+	type Breed struct {
+		Name string `json:"name" validate:"required,breed-exits"`
+	}
 	v1 := e.Group("/v1")
+	v1.GET("/ping", func(c echo.Context) error {
+		var breed Breed
+		if err := c.Bind(&breed); err != nil {
+			return c.JSON(http.StatusBadRequest, "")
+		}
+
+		if err := c.Validate(breed); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+		return c.JSON(http.StatusOK, breed)
+	})
 	v1.GET("/health", app.healthCheckHandler)
 	v1.GET("/swagger/*", echoSwagger.WrapHandler)
 
@@ -87,11 +118,13 @@ func (app *application) registerCatGroup(g *echo.Group) {
 
 func (app *application) registerMissionGroup(g *echo.Group) {
 	g.POST("", app.createMissionHandler)
+	g.GET("/mission_list", app.getMissions)
+	g.GET("/:id", app.getOneMission)
 	g.DELETE("/:id", app.deleteMissionHandler)
 	g.PATCH("/:id", app.updateMissionStatus)
 	g.PATCH("/:mission_id/target/:target_id", app.updateTargetNote)
 	g.PATCH("/:mission_id/target_status/:target_id", app.updateTargetStatus)
 	g.DELETE("/:mission_id/target/:target_id", app.deleteTarget)
 	g.POST("/:mission_id/target", app.addTarget)
-
+	g.PATCH("/:id/cat/:cat_id", app.addCatToMission)
 }

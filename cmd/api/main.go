@@ -4,7 +4,9 @@ import (
 	"FIDOtestBackendApp/internal/db"
 	"FIDOtestBackendApp/internal/env"
 	"FIDOtestBackendApp/internal/store"
+	"FIDOtestBackendApp/internal/store/cache"
 	"errors"
+	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 	"log"
@@ -41,6 +43,12 @@ func main() {
 			maxIdleConnections: 10,
 			maxIdleTime:        env.GetString("maxIdleTime", "15m"),
 		},
+		redisConfig: redisConfig{
+			addr:     env.GetString("REDIS_ADDR", "localhost:6379"),
+			password: env.GetString("REDIS_PASSWORD", ""),
+			db:       0,
+			enabled:  true,
+		},
 	}
 
 	// Logger init
@@ -60,10 +68,19 @@ func main() {
 
 	// Storage init
 	storage := store.NewStorage(database)
+
+	//redis
+	var cacheRedis *redis.Client
+	if cfg.redisConfig.enabled {
+		cacheRedis = cache.NewRedisClient(cfg.redisConfig.addr, cfg.redisConfig.password, cfg.redisConfig.db)
+	}
+	cacheStorage := cache.NewRedisStorage(cacheRedis)
+
 	app := &application{
-		config: cfg,
-		logger: logger,
-		store:  storage,
+		config:       cfg,
+		logger:       logger,
+		store:        storage,
+		cacheStorage: cacheStorage,
 	}
 	mux := app.mount()
 	log.Fatal(app.run(mux))
