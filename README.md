@@ -14,3 +14,16 @@ mkdir -p test && cd test && git clone https://github.com/Dzhodddi/GoTestAssessme
 ## Swagger-docs
 By default: app will run on 8080 port, and url for swagger-ui will <a>http://localhost:8080/v1/swagger/index.html</a>
 
+## Golang stack
+Golang stack
+<ul>
+  <li>Echo </li>
+  <li>Validator</li>
+  <li>Redis </li>
+  <li>Echo-swagger</li>
+  <li>Go-migrate</li>
+  <li>swaggo/swag</li>
+</ul>
+<strong>Database: PostgreSQL</strong> <br>
+<strong>NoSQL database: Redis</strong>
+
