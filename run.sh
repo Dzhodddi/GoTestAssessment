@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-mkdir -p test && cd test || exit
-
-git clone https://github.com/Dzhodddi/GoTestAssessment.git .
-
 mkdir -p bin
 go build -o ./bin/main ./cmd/api
 
