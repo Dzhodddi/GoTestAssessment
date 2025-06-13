@@ -13,6 +13,7 @@ var (
 	MissionedAssigned = errors.New("mission assigned")
 	TargetAmountError = errors.New("target amount error")
 	ViolatePK         = errors.New("violate pk error")
+	MissionCompleted  = errors.New("missiion completed")
 )
 
 type Storage struct {
@@ -27,6 +28,9 @@ type Storage struct {
 		CreateMission(ctx context.Context, mission *MissionWithTargets) error
 		DeleteMission(ctx context.Context, id int64) error
 		UpdateMissionStatus(ctx context.Context, mission *UpdatedMission) error
+		AddCatToMission(ctx context.Context, catID, missionID int64) error
+		GetMissionList(ctx context.Context) ([]*MissionWithMetadata, error)
+		GetOneMission(ctx context.Context, id int64) (*MissionWithMetadata, error)
 	}
 	Target interface {
 		UpdateTargetNote(ctx context.Context, updateNote *UpdateTargetNote) error

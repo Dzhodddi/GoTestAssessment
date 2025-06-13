@@ -118,8 +118,8 @@ func (app *application) getMissionById(c echo.Context) error {
 //	@Description	Update mission by ID
 //	@Tags			mission
 //	@Produce		json
-//	@Param			id	path		int	true	"Cat ID"
-//	@Success		200	{object}	store.Cat
+//	@Param			id	path		int	true	"Mission ID"
+//	@Success		200	{object}	store.UpdatedMission
 //	@Failure		422	{object}	error
 //	@Failure		400	{object}	error
 //	@Failure		500	{object}	error
@@ -144,4 +144,97 @@ func (app *application) updateMissionStatus(c echo.Context) error {
 		}
 	}
 	return c.JSON(http.StatusOK, payload)
+}
+
+// Add Spy Cat to Mission
+//
+//	@Summary		Add Spy Cat to Mission
+//	@Description	Add Spy Cat to Mission
+//	@Tags			mission
+//	@Param			id		path		int	true	"Mission ID"
+//	@Param			cat_id	path		int	true	"Cat ID"
+//	@Success		204		{object}	nil
+//	@Failure		422		{object}	error
+//	@Failure		400		{object}	error
+//	@Failure		500		{object}	error
+//	@Router			/mission/{id}/cat/{cat_id} [patch]
+func (app *application) addCatToMission(c echo.Context) error {
+	missionID := c.Param("id")
+	catID := c.Param("cat_id")
+	parsedMissionID, err := strconv.ParseInt(missionID, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ValidationError.Error())
+	}
+	parsedCatID, err := strconv.ParseInt(catID, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ValidationError.Error())
+	}
+	err = app.store.Mission.AddCatToMission(c.Request().Context(), parsedCatID, parsedMissionID)
+	if err != nil {
+		switch {
+		case errors.Is(err, store.ErrNotFound):
+			return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		case errors.Is(err, store.MissionCompleted):
+			return c.JSON(http.StatusConflict, err.Error())
+		case errors.Is(err, store.ViolatePK):
+			return c.JSON(http.StatusConflict, err.Error())
+		default:
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+	}
+
+	return c.NoContent(http.StatusCreated)
+}
+
+// List Missions
+//
+//	@Summary		List of missions
+//	@Description	List of missions
+//	@Tags			mission
+//	@Success		200	{object}	[]store.MissionWithMetadata
+//	@Failure		422	{object}	error
+//	@Failure		400	{object}	error
+//	@Failure		500	{object}	error
+//	@Router			/mission/mission_list [get]
+func (app *application) getMissions(c echo.Context) error {
+	list, err := app.store.Mission.GetMissionList(c.Request().Context())
+	if err != nil {
+		switch err {
+		case store.ErrNotFound:
+			return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		default:
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+	}
+	return c.JSON(http.StatusOK, list)
+}
+
+// Get one mission
+//
+//	@Summary		Get one of mission
+//	@Description	Get one of mission by ID
+//	@Tags			mission
+//	@Success		200	{object}	nil
+//	@Param			id	path		int	true	"Mission ID"
+//	@Failure		422	{object}	error
+//	@Failure		400	{object}	error
+//	@Failure		500	{object}	error
+//	@Router			/mission/{id} [get]
+func (app *application) getOneMission(c echo.Context) error {
+	id := c.Param("id")
+	parsedID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ValidationError.Error())
+	}
+
+	mission, err := app.store.Mission.GetOneMission(c.Request().Context(), parsedID)
+	if err != nil {
+		switch err {
+		case store.ErrNotFound:
+			return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		default:
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+	}
+	return c.JSON(http.StatusOK, mission)
 }
