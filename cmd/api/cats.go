@@ -15,7 +15,7 @@ var (
 type CreateCatPayload struct {
 	Name       string `json:"name" validate:"required,max=200"`
 	Experience int    `json:"year_of_experience" validate:"required,gte=1"`
-	Breed      string `json:"breed" validate:"required,max=200"`
+	Breed      string `json:"breed" validate:"required,max=200,breed-exits"`
 	Salary     int    `json:"salary" validate:"required,gte=1"`
 }
 
@@ -41,9 +41,20 @@ func (app *application) createCatHandler(c echo.Context) error {
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(http.StatusBadRequest, ValidationError.Error())
 	}
-	if err := Validate.Struct(payload); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, ValidationError.Error())
+	breed, err := app.cacheStorage.Cats.Get(c.Request().Context(), payload.Breed)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+	if !breed {
+		if err = Validate.Struct(payload); err != nil {
+			return c.JSON(http.StatusUnprocessableEntity, ValidationError.Error())
+		}
+		err = app.cacheStorage.Cats.Set(c.Request().Context(), payload.Breed)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+	}
+
 	spyCat := &store.Cat{
 		Name:       payload.Name,
 		Breed:      payload.Breed,
