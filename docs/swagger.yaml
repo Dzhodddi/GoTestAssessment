@@ -473,6 +473,20 @@ paths:
       summary: List of missions
       tags:
       - mission
+  /ql:
+    get:
+      description: List of cats
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: List of cats
+      tags:
+      - spycat
   /spycat:
     get:
       consumes:

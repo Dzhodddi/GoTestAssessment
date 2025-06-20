@@ -5,6 +5,7 @@ go 1.24
 require (
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/graphql-go/graphql v0.8.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
 	github.com/swaggo/echo-swagger v1.4.1

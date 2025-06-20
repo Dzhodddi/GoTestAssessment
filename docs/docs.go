@@ -477,6 +477,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/ql": {
+            "get": {
+                "description": "List of cats",
+                "tags": [
+                    "spycat"
+                ],
+                "summary": "List of cats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/spycat": {
             "get": {
                 "description": "Fetches spy cat list",

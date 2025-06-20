@@ -18,6 +18,12 @@ type CatStore struct {
 	db *sql.DB
 }
 
+func NewCatStore(db *sql.DB) *CatStore {
+	return &CatStore{
+		db: db,
+	}
+}
+
 func (s *CatStore) CreateSpyCat(ctx context.Context, cat *Cat) error {
 	query := `INSERT INTO spycat (name, years, breed, salary) VALUES ($1, $2, $3, $4) RETURNING id`
 

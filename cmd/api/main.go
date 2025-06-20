@@ -3,6 +3,7 @@ package main
 import (
 	"FIDOtestBackendApp/internal/db"
 	"FIDOtestBackendApp/internal/env"
+	"FIDOtestBackendApp/internal/graphql"
 	"FIDOtestBackendApp/internal/store"
 	"FIDOtestBackendApp/internal/store/cache"
 	"errors"
@@ -75,12 +76,13 @@ func main() {
 		cacheRedis = cache.NewRedisClient(cfg.redisConfig.addr, cfg.redisConfig.password, cfg.redisConfig.db)
 	}
 	cacheStorage := cache.NewRedisStorage(cacheRedis)
-
+	graphqlStorage := graphql.NewGPQLStorage()
 	app := &application{
-		config:       cfg,
-		logger:       logger,
-		store:        storage,
-		cacheStorage: cacheStorage,
+		config:         cfg,
+		logger:         logger,
+		store:          storage,
+		cacheStorage:   cacheStorage,
+		graphqlStorage: graphqlStorage,
 	}
 	mux := app.mount()
 	log.Fatal(app.run(mux))

@@ -108,10 +108,6 @@ func (app *application) deleteMissionHandler(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func (app *application) getMissionById(c echo.Context) error {
-	return c.JSON(http.StatusOK, app.store.Mission)
-}
-
 // Update mission
 //
 //	@Summary		Update mission

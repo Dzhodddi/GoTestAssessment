@@ -3,6 +3,7 @@ package main
 import (
 	"FIDOtestBackendApp/docs"
 	"FIDOtestBackendApp/internal/env"
+	"FIDOtestBackendApp/internal/graphql"
 	"FIDOtestBackendApp/internal/store"
 	"FIDOtestBackendApp/internal/store/cache"
 	"fmt"
@@ -16,10 +17,11 @@ import (
 )
 
 type application struct {
-	config       config
-	logger       *zap.SugaredLogger
-	store        store.Storage
-	cacheStorage cache.Storage
+	config         config
+	logger         *zap.SugaredLogger
+	store          store.Storage
+	cacheStorage   cache.Storage
+	graphqlStorage *graphql.GPQLStorage
 }
 
 type dbConfig struct {
@@ -82,21 +84,9 @@ func (app *application) mount() http.Handler {
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		Timeout: 60 * time.Second,
 	}))
-	type Breed struct {
-		Name string `json:"name" validate:"required,breed-exits"`
-	}
 	v1 := e.Group("/v1")
-	v1.GET("/ping", func(c echo.Context) error {
-		var breed Breed
-		if err := c.Bind(&breed); err != nil {
-			return c.JSON(http.StatusBadRequest, "")
-		}
-
-		if err := c.Validate(breed); err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
-		}
-		return c.JSON(http.StatusOK, breed)
-	})
+	v1.GET("/ql", app.getListOfCatsQL)
+	v1.GET("/ping", app.healthCheckHandler)
 	v1.GET("/health", app.healthCheckHandler)
 	v1.GET("/swagger/*", echoSwagger.WrapHandler)
 
