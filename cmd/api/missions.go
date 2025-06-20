@@ -10,7 +10,7 @@ import (
 )
 
 type MissionPayload struct {
-	Complete bool     `json:"complete" validate:"required"`
+	Complete *bool    `json:"complete" validate:"required"`
 	Targets  []Target `json:"targets" validate:"required,min=1,max=3,dive"`
 }
 
@@ -50,7 +50,7 @@ func (app *application) createMissionHandler(c echo.Context) error {
 			Name:      target.Name,
 			Country:   target.Country,
 			Notes:     target.Notes,
-			Completed: target.Complete,
+			Completed: *target.Complete,
 		})
 	}
 
@@ -58,7 +58,7 @@ func (app *application) createMissionHandler(c echo.Context) error {
 		Targets: targets,
 		Mission: store.Mission{
 			CatID:     nil,
-			Completed: payload.Complete,
+			Completed: *payload.Complete,
 		},
 	}
 
