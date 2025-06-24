@@ -14,6 +14,12 @@ type Cat struct {
 	Salary     int    `json:"salary"`
 }
 
+type CatWithMission struct {
+	Cat     *Cat     `json:"cat"`
+	Mission *Mission `json:"mission"`
+	Target  []Target `json:"target"`
+}
+
 type CatStore struct {
 	db *sql.DB
 }
@@ -22,6 +28,53 @@ func NewCatStore(db *sql.DB) *CatStore {
 	return &CatStore{
 		db: db,
 	}
+}
+
+func (s *CatStore) GetCatWithMissionAndTargets(ctx context.Context, id int64) (*CatWithMission, error) {
+	var catInfo CatWithMission
+	query := `SELECT id, name, years, breed, salary FROM spycat WHERE id = $1;`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOut)
+	defer cancel()
+
+	var cat Cat
+	err := s.db.QueryRowContext(ctx, query, id).Scan(&cat.ID, &cat.Name, &cat.Experience, &cat.Breed, &cat.Salary)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrNotFound
+		default:
+			return nil, err
+		}
+	}
+	catInfo.Cat = &cat
+	var mission Mission
+	query = `SELECT id, cat_id, completed FROM missions WHERE cat_id = $1;`
+	err = s.db.QueryRowContext(ctx, query, id).Scan(&mission.ID, &mission.CatID, &mission.Completed)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return &catInfo, nil
+		default:
+			return nil, err
+		}
+	}
+	catInfo.Mission = &mission
+	query = "SELECT id, name, country, notes, completed FROM targets WHERE mission_id = $1;"
+	rows, err := s.db.QueryContext(ctx, query, mission.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var target Target
+		if err = rows.Scan(&target.ID, &target.Name, &target.Country, &target.Notes, &target.Completed); err != nil {
+			return nil, err
+		}
+		catInfo.Target = append(catInfo.Target, target)
+	}
+
+	return &catInfo, nil
 }
 
 func (s *CatStore) CreateSpyCat(ctx context.Context, cat *Cat) error {

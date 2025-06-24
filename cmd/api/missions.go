@@ -1,7 +1,7 @@
 package main
 
 import (
-	"FIDOtestBackendApp/internal/store"
+	"WorkAssigment/internal/store"
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"

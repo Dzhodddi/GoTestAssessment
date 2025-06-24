@@ -1,7 +1,7 @@
 package main
 
 import (
-	"FIDOtestBackendApp/internal/validation"
+	"WorkAssigment/internal/validation"
 	"github.com/go-playground/validator/v10"
 )
 

@@ -477,13 +477,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/ql": {
+        "/ql/{id}": {
             "get": {
                 "description": "List of cats",
                 "tags": [
                     "spycat"
                 ],
                 "summary": "List of cats",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cat ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -763,6 +772,7 @@ const docTemplate = `{
         "main.Target": {
             "type": "object",
             "required": [
+                "complete",
                 "country",
                 "name",
                 "notes"

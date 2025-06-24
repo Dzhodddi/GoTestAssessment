@@ -1,11 +1,11 @@
 package main
 
 import (
-	"FIDOtestBackendApp/internal/db"
-	"FIDOtestBackendApp/internal/env"
-	"FIDOtestBackendApp/internal/graphql"
-	"FIDOtestBackendApp/internal/store"
-	"FIDOtestBackendApp/internal/store/cache"
+	"WorkAssigment/internal/db"
+	"WorkAssigment/internal/env"
+	//"WorkAssigment/internal/graphql"
+	"WorkAssigment/internal/store"
+	"WorkAssigment/internal/store/cache"
 	"errors"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq"
@@ -76,13 +76,13 @@ func main() {
 		cacheRedis = cache.NewRedisClient(cfg.redisConfig.addr, cfg.redisConfig.password, cfg.redisConfig.db)
 	}
 	cacheStorage := cache.NewRedisStorage(cacheRedis)
-	graphqlStorage := graphql.NewGPQLStorage()
+	//graphqlStorage := graphql.NewGPQLStorage(database)
 	app := &application{
-		config:         cfg,
-		logger:         logger,
-		store:          storage,
-		cacheStorage:   cacheStorage,
-		graphqlStorage: graphqlStorage,
+		config:       cfg,
+		logger:       logger,
+		store:        storage,
+		cacheStorage: cacheStorage,
+		//graphqlStorage: graphqlStorage,
 	}
 	mux := app.mount()
 	log.Fatal(app.run(mux))

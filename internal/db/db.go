@@ -1,7 +1,7 @@
 package db
 
 import (
-	"FIDOtestBackendApp/internal/store"
+	"WorkAssigment/internal/store"
 	"context"
 	"database/sql"
 	"time"

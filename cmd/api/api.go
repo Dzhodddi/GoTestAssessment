@@ -1,11 +1,11 @@
 package main
 
 import (
-	"FIDOtestBackendApp/docs"
-	"FIDOtestBackendApp/internal/env"
-	"FIDOtestBackendApp/internal/graphql"
-	"FIDOtestBackendApp/internal/store"
-	"FIDOtestBackendApp/internal/store/cache"
+	"WorkAssigment/docs"
+	"WorkAssigment/internal/env"
+	//"WorkAssigment/internal/graphql"
+	"WorkAssigment/internal/store"
+	"WorkAssigment/internal/store/cache"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -17,11 +17,11 @@ import (
 )
 
 type application struct {
-	config         config
-	logger         *zap.SugaredLogger
-	store          store.Storage
-	cacheStorage   cache.Storage
-	graphqlStorage *graphql.GPQLStorage
+	config       config
+	logger       *zap.SugaredLogger
+	store        store.Storage
+	cacheStorage cache.Storage
+	/*	graphqlStorage *graphql.GPQLStorage*/
 }
 
 type dbConfig struct {
@@ -85,7 +85,7 @@ func (app *application) mount() http.Handler {
 		Timeout: 60 * time.Second,
 	}))
 	v1 := e.Group("/v1")
-	v1.GET("/ql", app.getListOfCatsQL)
+	/*	v1.GET("/ql/:id", app.getListOfCatsQL) */
 	v1.GET("/ping", app.healthCheckHandler)
 	v1.GET("/health", app.healthCheckHandler)
 	v1.GET("/swagger/*", echoSwagger.WrapHandler)

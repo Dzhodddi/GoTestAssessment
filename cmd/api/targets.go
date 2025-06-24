@@ -1,7 +1,7 @@
 package main
 
 import (
-	"FIDOtestBackendApp/internal/store"
+	"WorkAssigment/internal/store"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"

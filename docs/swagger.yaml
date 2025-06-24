@@ -51,6 +51,7 @@ definitions:
         minLength: 1
         type: string
     required:
+    - complete
     - country
     - name
     - notes
@@ -473,9 +474,15 @@ paths:
       summary: List of missions
       tags:
       - mission
-  /ql:
+  /ql/{id}:
     get:
       description: List of cats
+      parameters:
+      - description: Cat ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: OK
