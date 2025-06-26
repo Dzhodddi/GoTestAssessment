@@ -18,7 +18,7 @@ type User {
 
 type Query {
   todos: [Todo!]!
-  cat: SpyCatInfo!
+  cat(id: Int64!): SpyCatInfo!
 }
 
 input NewTodo {

@@ -58,7 +58,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Cat   func(childComplexity int) int
+		Cat   func(childComplexity int, id int) int
 		Todos func(childComplexity int) int
 	}
 
@@ -97,7 +97,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
-	Cat(ctx context.Context) (*model.SpyCatInfo, error)
+	Cat(ctx context.Context, id int) (*model.SpyCatInfo, error)
 }
 
 type executableSchema struct {
@@ -157,7 +157,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.complexity.Query.Cat(childComplexity), true
+		args, err := ec.field_Query_cat_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Cat(childComplexity, args["id"].(int)), true
 
 	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
@@ -453,6 +458,29 @@ func (ec *executionContext) field_Query___type_argsName(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_cat_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_cat_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_cat_argsID(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt642int(ctx, tmp)
+	}
+
+	var zeroVal int
 	return zeroVal, nil
 }
 
@@ -833,7 +861,7 @@ func (ec *executionContext) _Query_cat(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Cat(rctx)
+		return ec.resolvers.Query().Cat(rctx, fc.Args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -850,7 +878,7 @@ func (ec *executionContext) _Query_cat(ctx context.Context, field graphql.Collec
 	return ec.marshalNSpyCatInfo2ᚖWorkAssigmentᚋgraphᚋmodelᚐSpyCatInfo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_cat(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_cat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -873,6 +901,17 @@ func (ec *executionContext) fieldContext_Query_cat(_ context.Context, field grap
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SpyCatInfo", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_cat_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }

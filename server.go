@@ -2,28 +2,27 @@ package main
 
 import (
 	"WorkAssigment/graph"
-	"log"
-	"net/http"
-	"os"
-
+	db "WorkAssigment/internal/db"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/vektah/gqlparser/v2/ast"
+	"log"
+	"net/http"
 )
 
-const defaultPort = "42069"
+const graphQL = "42069"
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
+	database, err := db.New("postgresql://postgres:adminadmin@localhost:5432/testGo?sslmode=disable", 5, 5, "15m")
+	if err != nil {
+		log.Fatal(err)
 	}
+	resolver := graph.NewResolver(database)
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
@@ -38,6 +37,6 @@ func main() {
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", graphQL)
+	_ = http.ListenAndServe(":"+graphQL, nil)
 }

@@ -8,6 +8,7 @@ import (
 	"WorkAssigment/graph/model"
 	"context"
 	"fmt"
+	"log"
 )
 
 // CreateTodo is the resolver for the createTodo field.
@@ -17,12 +18,14 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+	log.Printf("dadadad")
+	return nil, nil
 }
 
 // Cat is the resolver for the cat field.
-func (r *queryResolver) Cat(ctx context.Context) (*model.SpyCatInfo, error) {
-	dbCat, err := r.catService.GetCatWithMissionAndTargets(ctx, 3)
+func (r *queryResolver) Cat(ctx context.Context, id int) (*model.SpyCatInfo, error) {
+	log.Printf("Cat resolver called with id=%d, catService: %+v", id, r.catService)
+	dbCat, err := r.catService.GetCatWithMissionAndTargets(ctx, int64(id))
 	if err != nil {
 		return nil, err
 	}
