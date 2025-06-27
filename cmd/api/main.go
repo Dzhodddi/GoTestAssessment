@@ -1,6 +1,7 @@
 package main
 
 import (
+	"WorkAssigment/graph"
 	"WorkAssigment/internal/db"
 	"WorkAssigment/internal/env"
 	//"WorkAssigment/internal/graphql"
@@ -14,6 +15,7 @@ import (
 )
 
 const version = "0.0.1"
+const graphQL = "42069"
 
 var (
 	ConflictError = errors.New("conflict")
@@ -76,14 +78,16 @@ func main() {
 		cacheRedis = cache.NewRedisClient(cfg.redisConfig.addr, cfg.redisConfig.password, cfg.redisConfig.db)
 	}
 	cacheStorage := cache.NewRedisStorage(cacheRedis)
-	//graphqlStorage := graphql.NewGPQLStorage(database)
+	resolver := graph.NewResolver(database)
+	directiveHandler := &ValidatorDirective{Validate: Validate}
+	cfg.graphQLConfig.config = graph.Config{Resolvers: resolver, Directives: graph.DirectiveRoot{Validate: directiveHandler.Binding}}
 	app := &application{
 		config:       cfg,
 		logger:       logger,
 		store:        storage,
 		cacheStorage: cacheStorage,
-		//graphqlStorage: graphqlStorage,
 	}
+
 	mux := app.mount()
 	log.Fatal(app.run(mux))
 }
