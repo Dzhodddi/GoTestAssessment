@@ -2,6 +2,7 @@ package main
 
 import (
 	"WorkAssigment/docs"
+	"WorkAssigment/graph"
 	"WorkAssigment/internal/env"
 	//"WorkAssigment/internal/graphql"
 	"WorkAssigment/internal/store"
@@ -21,7 +22,6 @@ type application struct {
 	logger       *zap.SugaredLogger
 	store        store.Storage
 	cacheStorage cache.Storage
-	/*	graphqlStorage *graphql.GPQLStorage*/
 }
 
 type dbConfig struct {
@@ -37,14 +37,19 @@ type redisConfig struct {
 	enabled  bool
 }
 type config struct {
-	addr        string
-	db          dbConfig
-	env         string
-	redisConfig redisConfig
+	addr          string
+	db            dbConfig
+	env           string
+	redisConfig   redisConfig
+	graphQLConfig graphQLConfig
 }
 
 type CustomValidator struct {
 	validator *validator.Validate
+}
+
+type graphQLConfig struct {
+	config graph.Config
 }
 
 func (cv *CustomValidator) Validate(i interface{}) error {
@@ -69,23 +74,19 @@ func (app *application) mount() http.Handler {
 	e.Validator = &CustomValidator{validator: Validate}
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			req := c.Request()
-			res := c.Response()
-			start := time.Now()
-			err := next(c)
-			stop := time.Now()
-			latency := stop.Sub(start)
-			app.logger.Infof("%s %s %d %v", req.Method, req.RequestURI, res.Status, latency)
-			return err
-		}
-	})
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "${time_rfc3339} [${status}] ${method} ${path}\n",
+	}))
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		Timeout: 60 * time.Second,
 	}))
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodOptions},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+
 	v1 := e.Group("/v1")
-	/*	v1.GET("/ql/:id", app.getListOfCatsQL) */
 	v1.GET("/ping", app.healthCheckHandler)
 	v1.GET("/health", app.healthCheckHandler)
 	v1.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -95,6 +96,9 @@ func (app *application) mount() http.Handler {
 
 	mission := v1.Group("/mission")
 	app.registerMissionGroup(mission)
+
+	v1.GET("/playground", app.playgroundHandler())
+	v1.Any("/graphql", app.registerGraphQL())
 	return e
 }
 
