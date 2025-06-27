@@ -6,20 +6,28 @@ package graph
 
 import (
 	"WorkAssigment/graph/model"
+	"WorkAssigment/internal/store"
 	"context"
-	"fmt"
 	"log"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
-}
-
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	log.Printf("dadadad")
-	return nil, nil
+// CreateSpyCat is the resolver for the createSpyCat field.
+func (r *mutationResolver) CreateSpyCat(ctx context.Context, input model.NewSpyCat) (*model.SpyCat, error) {
+	err := r.catService.CreateSpyCat(ctx, &store.Cat{
+		Name:       input.Name,
+		Experience: int(input.YearOfExperience),
+		Breed:      input.Breed,
+		Salary:     int(input.Salary),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &model.SpyCat{
+		Name:             input.Name,
+		YearOfExperience: input.YearOfExperience,
+		Breed:            input.Breed,
+		Salary:           input.Salary,
+	}, nil
 }
 
 // Cat is the resolver for the cat field.
@@ -40,11 +48,15 @@ func (r *queryResolver) Cat(ctx context.Context, id int) (*model.SpyCatInfo, err
 		}
 		targets = append(targets, t)
 	}
-	mission := &model.Mission{
-		ID:       int(dbCat.Mission.ID),
-		Complete: dbCat.Mission.Completed,
-		Targets:  targets,
+	var mission *model.Mission
+	if dbCat.Mission != nil {
+		mission = &model.Mission{
+			ID:       int(dbCat.Mission.ID),
+			Complete: dbCat.Mission.Completed,
+			Targets:  targets,
+		}
 	}
+
 	cat := model.SpyCatInfo{
 		ID:               int(dbCat.Cat.ID),
 		Name:             dbCat.Cat.Name,
