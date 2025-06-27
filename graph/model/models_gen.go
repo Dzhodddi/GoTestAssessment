@@ -2,21 +2,35 @@
 
 package model
 
+type CreateUserInput struct {
+	Email string `json:"email"`
+	Age   int32  `json:"age"`
+}
+
 type Mission struct {
 	ID       int       `json:"ID"`
 	Complete bool      `json:"Complete"`
-	Targets  []*Target `json:"Targets"`
+	Targets  []*Target `json:"Targets,omitempty"`
 }
 
 type Mutation struct {
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type NewSpyCat struct {
+	Name             string `json:"Name"`
+	YearOfExperience int32  `json:"YearOfExperience"`
+	Breed            string `json:"Breed"`
+	Salary           int32  `json:"Salary"`
 }
 
 type Query struct {
+}
+
+type SpyCat struct {
+	Name             string `json:"Name"`
+	YearOfExperience int32  `json:"YearOfExperience"`
+	Breed            string `json:"Breed"`
+	Salary           int32  `json:"Salary"`
 }
 
 type SpyCatInfo struct {
@@ -25,7 +39,7 @@ type SpyCatInfo struct {
 	YearOfExperience int32    `json:"YearOfExperience"`
 	Breed            string   `json:"Breed"`
 	Salary           int32    `json:"Salary"`
-	Mission          *Mission `json:"Mission"`
+	Mission          *Mission `json:"Mission,omitempty"`
 }
 
 type Target struct {
@@ -34,13 +48,6 @@ type Target struct {
 	Country  string `json:"Country"`
 	Notes    string `json:"Notes"`
 	Complete bool   `json:"Complete"`
-}
-
-type Todo struct {
-	ID   int    `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
 }
 
 type User struct {

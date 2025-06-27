@@ -3,12 +3,11 @@
 # https://gqlgen.com/getting-started/
 
 scalar Int64
+directive @validate(rules: String!) on INPUT_FIELD_DEFINITION
 
-type Todo {
-  id: Int64!
-  text: String!
-  done: Boolean!
-  user: User!
+input CreateUserInput {
+  email: String! @validate(rules: "required,email")
+  age: Int! @validate(rules: "required,gte=18")
 }
 
 type User {
@@ -17,17 +16,12 @@ type User {
 }
 
 type Query {
-  todos: [Todo!]!
   cat(id: Int64!): SpyCatInfo!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
-}
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createSpyCat(input: NewSpyCat!): SpyCat!
 }
 
 type Target {
@@ -41,7 +35,7 @@ type Target {
 type Mission {
   ID: Int64!,
   Complete: Boolean!,
-  Targets: [Target!]!
+  Targets: [Target]
 }
 
 type SpyCatInfo {
@@ -50,5 +44,19 @@ type SpyCatInfo {
   YearOfExperience: Int!,
   Breed: String!,
   Salary: Int!,
-  Mission: Mission!
+  Mission: Mission
+}
+
+type SpyCat {
+  Name: String!,
+  YearOfExperience: Int!,
+  Breed: String!,
+  Salary: Int!,
+}
+
+input NewSpyCat {
+  Name: String!, @validate(rules: "min=1,max=200")
+  YearOfExperience: Int! @validate(rules:"gte=1"),
+  Breed: String! @validate(rules: "min=1,max=200"),
+  Salary: Int! @validate(rules: "gte=1"),
 }
